@@ -8,12 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import uvg.moviles.lab_07.navigation.CharacterDetail
-import uvg.moviles.lab_07.navigation.CharactersList
 import uvg.moviles.lab_07.navigation.Login
-import uvg.moviles.lab_07.ui.screens.CharacterDetailScreen
-import uvg.moviles.lab_07.ui.screens.CharactersListScreen
-import uvg.moviles.lab_07.ui.screens.LoginScreen
+import uvg.moviles.lab_07.navigation.MainTabs
+import uvg.moviles.lab_07.ui.screens.login.LoginScreen
+import uvg.moviles.lab_07.ui.screens.maintabs.MainTabsScreen
 import uvg.moviles.lab_07.ui.theme.Lab07Theme
 
 /**
@@ -44,29 +42,24 @@ fun RickAndMortyApp() {
         composable<Login> {
             LoginScreen(
                 onStartClick = {
-                    // Al navegar a la lista, se elimina Login del back stack
-                    // (inclusive = true). Así, si en Characters se presiona
+                    // Al navegar al contenedor principal, se elimina Login del back stack
+                    // (inclusive = true). Así, si dentro de los tabs se presiona
                     // "back", ya no hay nada a donde regresar y la app se
                     // cierra, en vez de volver al Login.
-                    navController.navigate(CharactersList) {
+                    navController.navigate(MainTabs) {
                         popUpTo(Login) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable<CharactersList> {
-            CharactersListScreen(
-                onCharacterClick = { characterId ->
-                    // Únicamente se manda el ID del personaje, nada más.
-                    navController.navigate(CharacterDetail(characterId = characterId))
+        composable<MainTabs> {
+            MainTabsScreen(
+                onLogout = {
+                    navController.navigate(Login) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
-            )
-        }
-
-        composable<CharacterDetail> {
-            CharacterDetailScreen(
-                onBackClick = { navController.popBackStack() }
             )
         }
     }

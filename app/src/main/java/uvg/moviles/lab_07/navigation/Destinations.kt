@@ -12,11 +12,25 @@ import kotlinx.serialization.Serializable
 object Login
 
 @Serializable
-object CharactersList
+object MainTabs
 
-/**
- * A "Character details" únicamente se le manda el ID del personaje,
- * nada más (ni el nombre, ni la imagen, ni el resto de la información).
- */
 @Serializable
-data class CharacterDetail(val characterId: Int)
+object CharactersGraph
+
+@Serializable
+object CharactersListDestination
+
+@Serializable
+data class CharacterDetailDestination(val characterId: Int)
+
+@Serializable
+object LocationsGraph
+
+@Serializable
+object LocationsListDestination
+
+@Serializable
+data class LocationDetailDestination(val locationId: Int)
+
+@Serializable
+object ProfileDestination
