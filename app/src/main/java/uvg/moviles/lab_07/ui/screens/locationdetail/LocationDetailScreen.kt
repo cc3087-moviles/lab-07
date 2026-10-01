@@ -1,11 +1,12 @@
 package uvg.moviles.lab_07.ui.screens.locationdetail
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -28,7 +31,7 @@ fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewM
     val location = viewModel.location
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text("Location details") },
+            title = { Text("Location Details") },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
@@ -42,10 +45,19 @@ fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewM
         )
     }) { innerPadding ->
         location ?: return@Scaffold
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp)) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = location.name,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.size(24.dp))
             DetailRow("ID:", location.id.toString())
-            HorizontalDivider()
-            DetailRow("Name:", location.name)
             HorizontalDivider()
             DetailRow("Type:", location.type)
             HorizontalDivider()
@@ -57,8 +69,14 @@ fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewM
 
 @Composable
 private fun DetailRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
     }
 }

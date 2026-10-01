@@ -4,7 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,12 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ProfileScreen(onLogoutClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -35,10 +39,33 @@ fun ProfileScreen(onLogoutClick: () -> Unit) {
             Icon(Icons.Default.Person, contentDescription = "Perfil", modifier = Modifier.size(80.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer)
         }
-        Text("Weslly Cabrera", style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(top = 24.dp))
-        Text("Carné: 25771", style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 32.dp))
+        Spacer(modifier = Modifier.size(32.dp))
+        Column(modifier = Modifier.fillMaxWidth()) {
+            ProfileDetailRow("Nombre:", "Weslly Alexander\nCabrera Morales")
+            ProfileDetailRow("Carné:", "25771")
+        }
+        Spacer(modifier = Modifier.size(32.dp))
         Button(onClick = onLogoutClick) { Text("Cerrar sesión") }
+    }
+}
+
+@Composable
+private fun ProfileDetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
