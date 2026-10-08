@@ -15,10 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uvg.moviles.lab_07.Location
+import uvg.moviles.lab_07.ui.components.ErrorLayout
+import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +30,8 @@ fun LocationsListScreen(
     onLocationClick: (Int) -> Unit,
     viewModel: LocationsListViewModel = viewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
+
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Locations") },
@@ -35,10 +41,21 @@ fun LocationsListScreen(
             )
         )
     }) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            items(viewModel.locations, key = { it.id }) { location ->
-                LocationRow(location, onClick = { onLocationClick(location.id) })
-                HorizontalDivider()
+        when {
+            state.isLoading -> LoadingLayout(
+                onClick = viewModel::onLoadingClicked,
+                modifier = Modifier.padding(innerPadding)
+            )
+            state.hasError -> ErrorLayout(
+                message = "Error al obtener listado de ubicaciones. Intenta de nuevo",
+                onRetry = viewModel::retry,
+                modifier = Modifier.padding(innerPadding)
+            )
+            else -> LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                items(state.data, key = { it.id }) { location ->
+                    LocationRow(location, onClick = { onLocationClick(location.id) })
+                    HorizontalDivider()
+                }
             }
         }
     }

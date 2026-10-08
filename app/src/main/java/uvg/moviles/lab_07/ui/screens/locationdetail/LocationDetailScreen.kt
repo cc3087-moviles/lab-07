@@ -19,16 +19,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import uvg.moviles.lab_07.ui.components.ErrorLayout
+import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewModel = viewModel()) {
-    val location = viewModel.location
+    val state by viewModel.uiState.collectAsState()
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Location Details") },
@@ -44,25 +48,38 @@ fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewM
             )
         )
     }) { innerPadding ->
-        location ?: return@Scaffold
-        Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = location.name,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+        when {
+            state.isLoading -> LoadingLayout(
+                onClick = viewModel::onLoadingClicked,
+                modifier = Modifier.padding(innerPadding)
             )
-            Spacer(modifier = Modifier.size(24.dp))
-            DetailRow("ID:", location.id.toString())
-            HorizontalDivider()
-            DetailRow("Type:", location.type)
-            HorizontalDivider()
-            DetailRow("Dimension:", location.dimension)
-            HorizontalDivider()
+            state.hasError -> ErrorLayout(
+                message = "Error al obtener la ubicación. Intenta de nuevo",
+                onRetry = viewModel::retry,
+                modifier = Modifier.padding(innerPadding)
+            )
+            else -> {
+                val location = state.data ?: return@Scaffold
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = location.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.size(24.dp))
+                    DetailRow("ID:", location.id.toString())
+                    HorizontalDivider()
+                    DetailRow("Type:", location.type)
+                    HorizontalDivider()
+                    DetailRow("Dimension:", location.dimension)
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }

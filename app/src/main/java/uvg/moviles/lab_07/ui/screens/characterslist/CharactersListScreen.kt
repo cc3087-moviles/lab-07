@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import uvg.moviles.lab_07.Character
+import uvg.moviles.lab_07.ui.components.ErrorLayout
+import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +36,8 @@ fun CharactersListScreen(
     onCharacterClick: (Int) -> Unit,
     viewModel: CharactersListViewModel = viewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
+
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Characters") },
@@ -41,10 +47,21 @@ fun CharactersListScreen(
             )
         )
     }) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            items(viewModel.characters, key = { it.id }) { character ->
-                CharacterRow(character, onClick = { onCharacterClick(character.id) })
-                HorizontalDivider()
+        when {
+            state.isLoading -> LoadingLayout(
+                onClick = viewModel::onLoadingClicked,
+                modifier = Modifier.padding(innerPadding)
+            )
+            state.hasError -> ErrorLayout(
+                message = "Error al obtener listado de personajes. Intenta de nuevo",
+                onRetry = viewModel::retry,
+                modifier = Modifier.padding(innerPadding)
+            )
+            else -> LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                items(state.data, key = { it.id }) { character ->
+                    CharacterRow(character, onClick = { onCharacterClick(character.id) })
+                    HorizontalDivider()
+                }
             }
         }
     }

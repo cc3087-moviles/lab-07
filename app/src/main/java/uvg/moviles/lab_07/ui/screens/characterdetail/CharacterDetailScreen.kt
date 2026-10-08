@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +29,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import uvg.moviles.lab_07.ui.components.ErrorLayout
+import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailScreen(onBackClick: () -> Unit, viewModel: CharacterDetailViewModel = viewModel()) {
-    val character = viewModel.character
+    val state by viewModel.uiState.collectAsState()
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Characters details") },
@@ -47,22 +51,35 @@ fun CharacterDetailScreen(onBackClick: () -> Unit, viewModel: CharacterDetailVie
             )
         )
     }) { innerPadding ->
-        character ?: return@Scaffold
-        Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(character.image, character.name, contentScale = ContentScale.Crop,
-                modifier = Modifier.size(160.dp).clip(CircleShape))
-            Text(character.name, style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(top = 16.dp, bottom = 24.dp))
-            DetailRow("Species:", character.species)
-            HorizontalDivider()
-            DetailRow("Status:", character.status)
-            HorizontalDivider()
-            DetailRow("Gender:", character.gender)
-            HorizontalDivider()
+        when {
+            state.isLoading -> LoadingLayout(
+                onClick = viewModel::onLoadingClicked,
+                modifier = Modifier.padding(innerPadding)
+            )
+            state.hasError -> ErrorLayout(
+                message = "Error al obtener el personaje. Intenta de nuevo",
+                onRetry = viewModel::retry,
+                modifier = Modifier.padding(innerPadding)
+            )
+            else -> {
+                val character = state.data ?: return@Scaffold
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(character.image, character.name, contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(160.dp).clip(CircleShape))
+                    Text(character.name, style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 24.dp))
+                    DetailRow("Species:", character.species)
+                    HorizontalDivider()
+                    DetailRow("Status:", character.status)
+                    HorizontalDivider()
+                    DetailRow("Gender:", character.gender)
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }

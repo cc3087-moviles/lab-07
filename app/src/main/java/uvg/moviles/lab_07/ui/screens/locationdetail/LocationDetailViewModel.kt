@@ -1,23 +1,55 @@
 package uvg.moviles.lab_07.ui.screens.locationdetail
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Location
 import uvg.moviles.lab_07.LocationDb
 import uvg.moviles.lab_07.navigation.LocationDetailDestination
 
+data class LocationDetailUiState(
+    val isLoading: Boolean = true,
+    val data: Location? = null,
+    val hasError: Boolean = false
+)
+
 class LocationDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val locationDb = LocationDb()
     private val route: LocationDetailDestination = savedStateHandle.toRoute()
+    private var loadJob: Job? = null
 
-    var location by mutableStateOf<Location?>(null)
-        private set
+    private val _uiState = MutableStateFlow(LocationDetailUiState())
+    val uiState: StateFlow<LocationDetailUiState> = _uiState.asStateFlow()
 
     init {
-        location = locationDb.getLocationById(route.locationId)
+        loadData()
+    }
+
+    fun onLoadingClicked() {
+        loadJob?.cancel()
+        _uiState.value = _uiState.value.copy(isLoading = false, hasError = true)
+    }
+
+    fun retry() {
+        loadJob?.cancel()
+        loadData()
+    }
+
+    private fun loadData() {
+        _uiState.value = LocationDetailUiState()
+        loadJob = viewModelScope.launch {
+            delay(2000)
+            _uiState.value = LocationDetailUiState(
+                isLoading = false,
+                data = locationDb.getLocationById(route.locationId)
+            )
+        }
     }
 }
