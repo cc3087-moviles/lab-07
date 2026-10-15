@@ -9,6 +9,9 @@ import kotlinx.serialization.Serializable
  */
 
 @Serializable
+object StartupDestination
+
+@Serializable
 object Login
 
 @Serializable

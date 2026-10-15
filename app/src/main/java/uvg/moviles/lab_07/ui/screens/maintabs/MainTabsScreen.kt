@@ -96,7 +96,7 @@ fun MainTabsScreen(onLogout: () -> Unit) {
                 }
             }
             composable<ProfileDestination> {
-                ProfileScreen(onLogoutClick = onLogout)
+                ProfileScreen(onLogoutCompleted = onLogout)
             }
         }
     }

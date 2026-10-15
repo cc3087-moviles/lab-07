@@ -10,8 +10,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import uvg.moviles.lab_07.navigation.Login
 import uvg.moviles.lab_07.navigation.MainTabs
+import uvg.moviles.lab_07.navigation.StartupDestination
 import uvg.moviles.lab_07.ui.screens.login.LoginScreen
 import uvg.moviles.lab_07.ui.screens.maintabs.MainTabsScreen
+import uvg.moviles.lab_07.ui.screens.startup.StartupScreen
 import uvg.moviles.lab_07.ui.theme.Lab07Theme
 
 /**
@@ -37,11 +39,21 @@ fun RickAndMortyApp() {
 
     NavHost(
         navController = navController,
-        startDestination = Login
+        startDestination = StartupDestination
     ) {
+        composable<StartupDestination> {
+            StartupScreen(
+                onSessionResolved = { hasActiveSession ->
+                    navController.navigate(if (hasActiveSession) MainTabs else Login) {
+                        popUpTo(StartupDestination) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<Login> {
             LoginScreen(
-                onStartClick = {
+                onLoginCompleted = {
                     // Al navegar al contenedor principal, se elimina Login del back stack
                     // (inclusive = true). Así, si dentro de los tabs se presiona
                     // "back", ya no hay nada a donde regresar y la app se

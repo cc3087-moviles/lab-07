@@ -18,14 +18,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import uvg.moviles.lab_07.appViewModelFactory
 
 @Composable
-fun ProfileScreen(onLogoutClick: () -> Unit) {
+fun ProfileScreen(
+    onLogoutCompleted: () -> Unit,
+    viewModel: ProfileViewModel = viewModel(factory = appViewModelFactory)
+) {
+    val name by viewModel.name.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,11 +50,11 @@ fun ProfileScreen(onLogoutClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.size(32.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
-            ProfileDetailRow("Nombre:", "Weslly Alexander\nCabrera Morales")
+            ProfileDetailRow("Nombre:", name)
             ProfileDetailRow("Carné:", "25771")
         }
         Spacer(modifier = Modifier.size(32.dp))
-        Button(onClick = onLogoutClick) { Text("Cerrar sesión") }
+        Button(onClick = { viewModel.logout(onLogoutCompleted) }) { Text("Cerrar sesión") }
     }
 }
 
