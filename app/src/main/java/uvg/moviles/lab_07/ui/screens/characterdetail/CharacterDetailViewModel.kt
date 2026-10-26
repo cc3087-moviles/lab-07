@@ -9,9 +9,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Character
-import uvg.moviles.lab_07.CharacterDb
+import uvg.moviles.lab_07.data.AppDataRepository
 import uvg.moviles.lab_07.navigation.CharacterDetailDestination
 
 data class CharacterDetailUiState(
@@ -20,8 +21,10 @@ data class CharacterDetailUiState(
     val hasError: Boolean = false
 )
 
-class CharacterDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
-    private val characterDb = CharacterDb()
+class CharacterDetailViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val appDataRepository: AppDataRepository
+) : ViewModel() {
     private val route: CharacterDetailDestination = savedStateHandle.toRoute()
     private var loadJob: Job? = null
 
@@ -42,14 +45,19 @@ class CharacterDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel()
         loadData()
     }
 
+    fun toggleFavorite(character: Character) {
+        viewModelScope.launch {
+            appDataRepository.setFavorite(character.id, !character.isFavorite)
+        }
+    }
+
     private fun loadData() {
         _uiState.value = CharacterDetailUiState()
         loadJob = viewModelScope.launch {
             delay(2000)
-            _uiState.value = CharacterDetailUiState(
-                isLoading = false,
-                data = characterDb.getCharacterById(route.characterId)
-            )
+            appDataRepository.character(route.characterId).filterNotNull().collect { character ->
+                _uiState.value = CharacterDetailUiState(isLoading = false, data = character)
+            }
         }
     }
 }

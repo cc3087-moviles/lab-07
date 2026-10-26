@@ -26,12 +26,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import uvg.moviles.lab_07.appViewModelFactory
 import uvg.moviles.lab_07.ui.components.ErrorLayout
 import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocationDetailScreen(onBackClick: () -> Unit, viewModel: LocationDetailViewModel = viewModel()) {
+fun LocationDetailScreen(
+    onBackClick: () -> Unit,
+    viewModel: LocationDetailViewModel = viewModel(factory = appViewModelFactory)
+) {
     val state by viewModel.uiState.collectAsState()
     Scaffold(topBar = {
         TopAppBar(

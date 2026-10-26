@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Location
-import uvg.moviles.lab_07.LocationDb
+import uvg.moviles.lab_07.data.AppDataRepository
 
 data class LocationsListUiState(
     val isLoading: Boolean = true,
@@ -17,8 +17,7 @@ data class LocationsListUiState(
     val hasError: Boolean = false
 )
 
-class LocationsListViewModel : ViewModel() {
-    private val locationDb = LocationDb()
+class LocationsListViewModel(private val appDataRepository: AppDataRepository) : ViewModel() {
     private var loadJob: Job? = null
 
     private val _uiState = MutableStateFlow(LocationsListUiState())
@@ -42,10 +41,9 @@ class LocationsListViewModel : ViewModel() {
         _uiState.value = LocationsListUiState()
         loadJob = viewModelScope.launch {
             delay(4000)
-            _uiState.value = LocationsListUiState(
-                isLoading = false,
-                data = locationDb.getAllLocations()
-            )
+            appDataRepository.locations.collect { locations ->
+                _uiState.value = LocationsListUiState(isLoading = false, data = locations)
+            }
         }
     }
 }

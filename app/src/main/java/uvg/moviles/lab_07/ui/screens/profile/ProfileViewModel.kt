@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uvg.moviles.lab_07.data.AppDataRepository
 import uvg.moviles.lab_07.data.UserPreferencesRepository
 
 class ProfileViewModel(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appDataRepository: AppDataRepository
 ) : ViewModel() {
     val name: StateFlow<String> = userPreferencesRepository.name
         .map { it.orEmpty() }
@@ -23,6 +25,7 @@ class ProfileViewModel(
     fun logout(onLogoutCompleted: () -> Unit) {
         viewModelScope.launch {
             userPreferencesRepository.clearName()
+            appDataRepository.clearAll()
             onLogoutCompleted()
         }
     }

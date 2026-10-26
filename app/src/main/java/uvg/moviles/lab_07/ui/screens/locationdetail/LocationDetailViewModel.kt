@@ -9,9 +9,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Location
-import uvg.moviles.lab_07.LocationDb
+import uvg.moviles.lab_07.data.AppDataRepository
 import uvg.moviles.lab_07.navigation.LocationDetailDestination
 
 data class LocationDetailUiState(
@@ -20,8 +21,10 @@ data class LocationDetailUiState(
     val hasError: Boolean = false
 )
 
-class LocationDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
-    private val locationDb = LocationDb()
+class LocationDetailViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val appDataRepository: AppDataRepository
+) : ViewModel() {
     private val route: LocationDetailDestination = savedStateHandle.toRoute()
     private var loadJob: Job? = null
 
@@ -46,10 +49,9 @@ class LocationDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         _uiState.value = LocationDetailUiState()
         loadJob = viewModelScope.launch {
             delay(2000)
-            _uiState.value = LocationDetailUiState(
-                isLoading = false,
-                data = locationDb.getLocationById(route.locationId)
-            )
+            appDataRepository.location(route.locationId).filterNotNull().collect { location ->
+                _uiState.value = LocationDetailUiState(isLoading = false, data = location)
+            }
         }
     }
 }

@@ -3,12 +3,16 @@ package uvg.moviles.lab_07.ui.screens.login
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +33,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel(factory = appViewModelFactory)
 ) {
     val name by viewModel.name.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
 
     Scaffold { innerPadding ->
         Column(
@@ -49,14 +54,36 @@ fun LoginScreen(
                 label = { Text("Nombre") },
                 placeholder = { Text("Nombre") },
                 singleLine = true,
+                enabled = !isSyncing,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = { viewModel.login(onLoginCompleted) },
-                enabled = name.trim().isNotEmpty(),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-            ) { Text(text = "Iniciar sesión") }
+                enabled = name.trim().isNotEmpty() && !isSyncing,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Iniciar sesión")
+            }
+            if (isSyncing) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Preparando tus datos...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                }
+            }
         }
     }
 }

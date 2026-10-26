@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Character
-import uvg.moviles.lab_07.CharacterDb
+import uvg.moviles.lab_07.data.AppDataRepository
 
 data class CharactersListUiState(
     val isLoading: Boolean = true,
@@ -17,12 +17,14 @@ data class CharactersListUiState(
     val hasError: Boolean = false
 )
 
-class CharactersListViewModel : ViewModel() {
-    private val characterDb = CharacterDb()
+class CharactersListViewModel(private val appDataRepository: AppDataRepository) : ViewModel() {
     private var loadJob: Job? = null
 
     private val _uiState = MutableStateFlow(CharactersListUiState())
     val uiState: StateFlow<CharactersListUiState> = _uiState.asStateFlow()
+
+    private val _showOnlyFavorites = MutableStateFlow(false)
+    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites.asStateFlow()
 
     init {
         loadData()
@@ -38,14 +40,23 @@ class CharactersListViewModel : ViewModel() {
         loadData()
     }
 
+    fun toggleFavoritesFilter() {
+        _showOnlyFavorites.value = !_showOnlyFavorites.value
+    }
+
+    fun toggleFavorite(character: Character) {
+        viewModelScope.launch {
+            appDataRepository.setFavorite(character.id, !character.isFavorite)
+        }
+    }
+
     private fun loadData() {
         _uiState.value = CharactersListUiState()
         loadJob = viewModelScope.launch {
             delay(4000)
-            _uiState.value = CharactersListUiState(
-                isLoading = false,
-                data = characterDb.getAllCharacters()
-            )
+            appDataRepository.characters.collect { characters ->
+                _uiState.value = CharactersListUiState(isLoading = false, data = characters)
+            }
         }
     }
 }

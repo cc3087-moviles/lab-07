@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uvg.moviles.lab_07.Location
+import uvg.moviles.lab_07.appViewModelFactory
 import uvg.moviles.lab_07.ui.components.ErrorLayout
 import uvg.moviles.lab_07.ui.components.LoadingLayout
 
@@ -28,7 +29,7 @@ import uvg.moviles.lab_07.ui.components.LoadingLayout
 @Composable
 fun LocationsListScreen(
     onLocationClick: (Int) -> Unit,
-    viewModel: LocationsListViewModel = viewModel()
+    viewModel: LocationsListViewModel = viewModel(factory = appViewModelFactory)
 ) {
     val state by viewModel.uiState.collectAsState()
 

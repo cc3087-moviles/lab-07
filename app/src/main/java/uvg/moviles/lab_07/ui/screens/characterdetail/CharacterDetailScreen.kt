@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,12 +31,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import uvg.moviles.lab_07.appViewModelFactory
 import uvg.moviles.lab_07.ui.components.ErrorLayout
 import uvg.moviles.lab_07.ui.components.LoadingLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharacterDetailScreen(onBackClick: () -> Unit, viewModel: CharacterDetailViewModel = viewModel()) {
+fun CharacterDetailScreen(
+    onBackClick: () -> Unit,
+    viewModel: CharacterDetailViewModel = viewModel(factory = appViewModelFactory)
+) {
     val state by viewModel.uiState.collectAsState()
     Scaffold(topBar = {
         TopAppBar(
@@ -44,10 +50,24 @@ fun CharacterDetailScreen(onBackClick: () -> Unit, viewModel: CharacterDetailVie
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                 }
             },
+            actions = {
+                state.data?.let { character ->
+                    IconButton(onClick = { viewModel.toggleFavorite(character) }) {
+                        Icon(
+                            imageVector = if (character.isFavorite) Icons.Filled.Favorite
+                            else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorito",
+                            tint = if (character.isFavorite) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
             )
         )
     }) { innerPadding ->
