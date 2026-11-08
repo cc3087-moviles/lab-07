@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Character
-import uvg.moviles.lab_07.data.AppDataRepository
+import uvg.moviles.lab_07.data.CharacterRepository
 
 data class CharactersListUiState(
     val isLoading: Boolean = true,
@@ -17,14 +17,16 @@ data class CharactersListUiState(
     val hasError: Boolean = false
 )
 
-class CharactersListViewModel(private val appDataRepository: AppDataRepository) : ViewModel() {
+enum class CharacterFilter { ALL, FAVORITES, NOT_FAVORITES }
+
+class CharactersListViewModel(private val characterRepository: CharacterRepository) : ViewModel() {
     private var loadJob: Job? = null
 
     private val _uiState = MutableStateFlow(CharactersListUiState())
     val uiState: StateFlow<CharactersListUiState> = _uiState.asStateFlow()
 
-    private val _showOnlyFavorites = MutableStateFlow(false)
-    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites.asStateFlow()
+    private val _filter = MutableStateFlow(CharacterFilter.ALL)
+    val filter: StateFlow<CharacterFilter> = _filter.asStateFlow()
 
     init {
         loadData()
@@ -40,13 +42,11 @@ class CharactersListViewModel(private val appDataRepository: AppDataRepository) 
         loadData()
     }
 
-    fun toggleFavoritesFilter() {
-        _showOnlyFavorites.value = !_showOnlyFavorites.value
-    }
+    fun setFilter(filter: CharacterFilter) { _filter.value = filter }
 
     fun toggleFavorite(character: Character) {
         viewModelScope.launch {
-            appDataRepository.setFavorite(character.id, !character.isFavorite)
+            characterRepository.setFavorite(character.id, !character.isFavorite)
         }
     }
 
@@ -54,7 +54,7 @@ class CharactersListViewModel(private val appDataRepository: AppDataRepository) 
         _uiState.value = CharactersListUiState()
         loadJob = viewModelScope.launch {
             delay(4000)
-            appDataRepository.characters.collect { characters ->
+            characterRepository.observeAll().collect { characters ->
                 _uiState.value = CharactersListUiState(isLoading = false, data = characters)
             }
         }

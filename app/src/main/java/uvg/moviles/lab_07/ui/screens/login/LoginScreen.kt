@@ -34,6 +34,7 @@ fun LoginScreen(
 ) {
     val name by viewModel.name.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
+    val hasError by viewModel.hasError.collectAsState()
 
     Scaffold { innerPadding ->
         Column(
@@ -64,6 +65,14 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Iniciar sesión")
+            }
+            if (hasError) {
+                Text(
+                    text = "No se pudo obtener la información. Revisa tu conexión e intenta de nuevo.",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             }
             if (isSyncing) {
                 Row(

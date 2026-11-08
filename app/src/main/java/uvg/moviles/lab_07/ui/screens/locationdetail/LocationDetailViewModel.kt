@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Location
-import uvg.moviles.lab_07.data.AppDataRepository
+import uvg.moviles.lab_07.data.LocationRepository
 import uvg.moviles.lab_07.navigation.LocationDetailDestination
 
 data class LocationDetailUiState(
@@ -23,7 +23,7 @@ data class LocationDetailUiState(
 
 class LocationDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataRepository: AppDataRepository
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
     private val route: LocationDetailDestination = savedStateHandle.toRoute()
     private var loadJob: Job? = null
@@ -45,11 +45,15 @@ class LocationDetailViewModel(
         loadData()
     }
 
+    fun toggleFavorite(location: Location) {
+        viewModelScope.launch { locationRepository.setFavorite(location.id, !location.isFavorite) }
+    }
+
     private fun loadData() {
         _uiState.value = LocationDetailUiState()
         loadJob = viewModelScope.launch {
             delay(2000)
-            appDataRepository.location(route.locationId).filterNotNull().collect { location ->
+            locationRepository.observeById(route.locationId).filterNotNull().collect { location ->
                 _uiState.value = LocationDetailUiState(isLoading = false, data = location)
             }
         }

@@ -1,6 +1,7 @@
 package uvg.moviles.lab_07.ui.screens.maintabs
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -9,6 +10,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import uvg.moviles.lab_07.navigation.CharacterDetailDestination
+import uvg.moviles.lab_07.navigation.CharacterFormDestination
 import uvg.moviles.lab_07.navigation.CharactersGraph
 import uvg.moviles.lab_07.navigation.CharactersListDestination
 import uvg.moviles.lab_07.navigation.LocationDetailDestination
@@ -29,6 +32,7 @@ import uvg.moviles.lab_07.navigation.LocationsGraph
 import uvg.moviles.lab_07.navigation.LocationsListDestination
 import uvg.moviles.lab_07.navigation.ProfileDestination
 import uvg.moviles.lab_07.ui.screens.characterdetail.CharacterDetailScreen
+import uvg.moviles.lab_07.ui.screens.characterform.CharacterFormScreen
 import uvg.moviles.lab_07.ui.screens.characterslist.CharactersListScreen
 import uvg.moviles.lab_07.ui.screens.locationdetail.LocationDetailScreen
 import uvg.moviles.lab_07.ui.screens.locationslist.LocationsListScreen
@@ -43,6 +47,7 @@ fun MainTabsScreen(onLogout: () -> Unit) {
     val currentDestination = backStackEntry?.destination
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -69,18 +74,32 @@ fun MainTabsScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = CharactersGraph,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) {
             navigation<CharactersGraph>(startDestination = CharactersListDestination) {
                 composable<CharactersListDestination> {
                     CharactersListScreen(
                         onCharacterClick = { characterId ->
                             navController.navigate(CharacterDetailDestination(characterId))
-                        }
+                        },
+                        onCreateCharacter = { navController.navigate(CharacterFormDestination()) }
                     )
                 }
                 composable<CharacterDetailDestination> {
-                    CharacterDetailScreen(onBackClick = navController::popBackStack)
+                    CharacterDetailScreen(
+                        onBackClick = navController::popBackStack,
+                        onEditClick = { navController.navigate(CharacterFormDestination(it)) }
+                    )
+                }
+                composable<CharacterFormDestination> {
+                    CharacterFormScreen(
+                        onBackClick = navController::popBackStack,
+                        onSaved = { id ->
+                            navController.navigate(CharacterDetailDestination(id)) {
+                                popUpTo<CharacterFormDestination> { inclusive = true }
+                            }
+                        }
+                    )
                 }
             }
             navigation<LocationsGraph>(startDestination = LocationsListDestination) {

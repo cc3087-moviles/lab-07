@@ -27,6 +27,9 @@ object CharactersListDestination
 data class CharacterDetailDestination(val characterId: Int)
 
 @Serializable
+data class CharacterFormDestination(val characterId: Int? = null)
+
+@Serializable
 object LocationsGraph
 
 @Serializable

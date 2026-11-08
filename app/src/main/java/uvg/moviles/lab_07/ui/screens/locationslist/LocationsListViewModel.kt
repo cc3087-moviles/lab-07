@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Location
-import uvg.moviles.lab_07.data.AppDataRepository
+import uvg.moviles.lab_07.data.LocationRepository
 
 data class LocationsListUiState(
     val isLoading: Boolean = true,
@@ -17,11 +17,16 @@ data class LocationsListUiState(
     val hasError: Boolean = false
 )
 
-class LocationsListViewModel(private val appDataRepository: AppDataRepository) : ViewModel() {
+enum class LocationFilter { ALL, FAVORITES, NOT_FAVORITES }
+
+class LocationsListViewModel(private val locationRepository: LocationRepository) : ViewModel() {
     private var loadJob: Job? = null
 
     private val _uiState = MutableStateFlow(LocationsListUiState())
     val uiState: StateFlow<LocationsListUiState> = _uiState.asStateFlow()
+
+    private val _filter = MutableStateFlow(LocationFilter.ALL)
+    val filter: StateFlow<LocationFilter> = _filter.asStateFlow()
 
     init {
         loadData()
@@ -37,11 +42,17 @@ class LocationsListViewModel(private val appDataRepository: AppDataRepository) :
         loadData()
     }
 
+    fun setFilter(filter: LocationFilter) { _filter.value = filter }
+
+    fun toggleFavorite(location: Location) {
+        viewModelScope.launch { locationRepository.setFavorite(location.id, !location.isFavorite) }
+    }
+
     private fun loadData() {
         _uiState.value = LocationsListUiState()
         loadJob = viewModelScope.launch {
             delay(4000)
-            appDataRepository.locations.collect { locations ->
+            locationRepository.observeAll().collect { locations ->
                 _uiState.value = LocationsListUiState(isLoading = false, data = locations)
             }
         }

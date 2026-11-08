@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import uvg.moviles.lab_07.Character
-import uvg.moviles.lab_07.data.AppDataRepository
+import uvg.moviles.lab_07.data.CharacterRepository
 import uvg.moviles.lab_07.navigation.CharacterDetailDestination
 
 data class CharacterDetailUiState(
@@ -23,7 +23,7 @@ data class CharacterDetailUiState(
 
 class CharacterDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataRepository: AppDataRepository
+    private val characterRepository: CharacterRepository
 ) : ViewModel() {
     private val route: CharacterDetailDestination = savedStateHandle.toRoute()
     private var loadJob: Job? = null
@@ -47,7 +47,14 @@ class CharacterDetailViewModel(
 
     fun toggleFavorite(character: Character) {
         viewModelScope.launch {
-            appDataRepository.setFavorite(character.id, !character.isFavorite)
+            characterRepository.setFavorite(character.id, !character.isFavorite)
+        }
+    }
+
+    fun delete(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            characterRepository.delete(route.characterId)
+            onDeleted()
         }
     }
 
@@ -55,7 +62,7 @@ class CharacterDetailViewModel(
         _uiState.value = CharacterDetailUiState()
         loadJob = viewModelScope.launch {
             delay(2000)
-            appDataRepository.character(route.characterId).filterNotNull().collect { character ->
+            characterRepository.observeById(route.characterId).filterNotNull().collect { character ->
                 _uiState.value = CharacterDetailUiState(isLoading = false, data = character)
             }
         }

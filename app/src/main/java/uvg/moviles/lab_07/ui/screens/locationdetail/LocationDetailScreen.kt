@@ -1,6 +1,7 @@
 package uvg.moviles.lab_07.ui.screens.locationdetail
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,7 +40,7 @@ fun LocationDetailScreen(
     viewModel: LocationDetailViewModel = viewModel(factory = appViewModelFactory)
 ) {
     val state by viewModel.uiState.collectAsState()
-    Scaffold(topBar = {
+    Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0), topBar = {
         TopAppBar(
             title = { Text("Location Details") },
             navigationIcon = {
@@ -45,6 +48,7 @@ fun LocationDetailScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                 }
             },
+            actions = { state.data?.let { location -> IconButton(onClick = { viewModel.toggleFavorite(location) }) { Icon(if (location.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder, "Favorito", tint = if (location.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary) } } },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
